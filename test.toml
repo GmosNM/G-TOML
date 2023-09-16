@@ -1,0 +1,21 @@
+# Sample TOML Configuration File
+
+[server]
+hostname = "example.com"
+port = 8080
+enabled = true
+
+[database]
+name = "mydb"
+username = "user123"
+password = "secretpassword"
+
+[logging]
+level = "info"
+file = "app.log"
+
+[app]
+name = "MyTestApp"
+version = "1.0.0"
+isOpen = true
+
