@@ -7,6 +7,7 @@
 class TOMLNode{
 public:
   virtual ~TOMLNode(){};
+
 };
 
 // AST node for key-value pairs
@@ -56,16 +57,17 @@ public:
 // AST node for float values
 class FloatNode : public TOMLNode {
 public:
-    FloatNode(float value) : value(value) {}
+    FloatNode(std::string value) : value(value) {}
 
-    float value;
+    std::string value;
 };
 
 
 class ArrayNode : public TOMLNode {
 public:
-    ArrayNode(const std::vector<std::shared_ptr<TOMLNode>>& elements)
-        : elements(elements) {}
+    ArrayNode(const std::string& name, const std::vector<std::shared_ptr<TOMLNode>>& elements)
+        : array_name(name), elements(elements) {}
 
+    std::string array_name;
     std::vector<std::shared_ptr<TOMLNode>> elements;
 };

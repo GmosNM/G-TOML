@@ -13,10 +13,11 @@ int main(int argc, char *argv[]) {
     lexer.read();
     lexer.lex();
     lexer.toknizer();
-    GTOML::Parser parser(lexer,argv[1]);
+    GTOML::Parser parser(lexer);
 
     parser.Parse();
-    parser.printIR();
+    std::string arr = parser.findValueByKey("arr2");
+    std::cout << arr << std::endl;
 
     return 0;
 }

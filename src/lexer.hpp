@@ -66,12 +66,14 @@ namespace GTOML {
 
   class Lexer {
    public:
-    Lexer(std::string filename) : filename(filename){};
+    Lexer(std::string filename) : filename(filename){
+    };
     size_t currentTokenIndex = 0;
 
     SToken NextToken();
     SToken GetCurrentToken();
     SToken PrevToken();
+    SToken PervPrevToken();
 
     void read();
     void print_file();
@@ -88,6 +90,8 @@ namespace GTOML {
     bool hasMoreTokens();
     SToken CreateEmptyToken();
     SToken CreateEofToken();
+
+    std::string getFilePath() { return filename; }
 
 
     std::string ToString(Token token);

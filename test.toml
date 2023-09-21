@@ -1,20 +1,10 @@
-# floats
-flt1 = 1.1
-flt2 = 3.1415
-
-# integer
-int1 = 1
-int2 = -3
-
-# boolean
-bool1 = true
-bool2 = false
-
-# string
-str1 = "hello"
-str2 = "world"
-
 # array
-arr1 = [1, 2, 3]
-arr2 = ["hello", "world"]
-arr3 = [1.1, 2.2, 3.3]
+arr2 = [
+  1,
+  2, # this is ok
+]
+
+arr3 = [
+  "Hello",
+  "World", # this is ok
+]

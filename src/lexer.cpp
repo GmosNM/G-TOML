@@ -375,6 +375,13 @@ SToken Lexer::PrevToken() {
     }
 }
 
+SToken Lexer::PervPrevToken() {
+    if (currentTokenIndex > 0 && currentTokenIndex <= tokens.size()) {
+        return tokens[currentTokenIndex - 2];
+    } else {
+        return CreateEmptyToken();  // Return an empty token if there is no previous token
+    }
+}
 
 bool Lexer::hasMoreTokens() {
     return currentTokenIndex < tokens.size();
