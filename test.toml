@@ -1,21 +1,20 @@
-# Sample TOML Configuration File
+# floats
+flt1 = 1.1
+flt2 = 3.1415
 
-[server]
-hostname = "example.com"
-port = 8080
-enabled = true
+# integer
+int1 = 1
+int2 = -3
 
-[database]
-name = "mydb"
-username = "user123"
-password = "secretpassword"
+# boolean
+bool1 = true
+bool2 = false
 
-[logging]
-level = "info"
-file = "app.log"
+# string
+str1 = "hello"
+str2 = "world"
 
-[app]
-name = "MyTestApp"
-version = "1.0.0"
-isOpen = true
-
+# array
+arr1 = [1, 2, 3]
+arr2 = ["hello", "world"]
+arr3 = [1.1, 2.2, 3.3]
