@@ -17,7 +17,7 @@ Follow these instructions to get started with G-TOML in your C++ project.
 ### Prerequisites
 
 - C++17 or higher.
-- [Fast](https://github.com/GmosNM/Fast) (for building).
+- CMake (for building).
 
 ### Installation
 
@@ -27,12 +27,12 @@ Follow these instructions to get started with G-TOML in your C++ project.
    git clone https://github.com/GmosNM/G-TOML.git
    ```
 
-2. Build the library using Fast.
+2. Build the library using CMake.
 
-   im using my build system Fast[Fast](https://github.com/GmosNM/Fast).
    ```shell
    cd G-TOML
-   fast build
+   cmake -GNinja -B bld
+   cmake --build bld
    ```
 
 3. Link the G-TOML library to your C++ project.
