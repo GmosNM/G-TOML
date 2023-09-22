@@ -2,7 +2,7 @@
 
 using namespace GTOML;
 
-void Parser::Parse() {
+bool Parser::Parse() {
   Token currentTokenType = lexer.GetCurrentToken().type;
 
   while (currentTokenType != Token::EoF) {
@@ -11,10 +11,11 @@ void Parser::Parse() {
     } else {
       std::cerr << "Unexpected token: " << lexer.ToString(currentTokenType)
                 << std::endl;
-      break;
+      return false;
     }
     currentTokenType = lexer.GetCurrentToken().type;
   }
+  return true;
 }
 
 bool Parser::expect(Token token) {
