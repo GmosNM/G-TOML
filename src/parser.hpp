@@ -1,33 +1,41 @@
-#include "ast.hpp"
-#include "lexer.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 
+#include "ast.hpp"
+#include "lexer.hpp"
+
 namespace GTOML {
-    class Parser {
-        public:
-            std::vector<std::shared_ptr<TOMLNode>> parsedNodes;
+typedef std::shared_ptr<TOMLNode> Node;
+class Parser {
+ public:
+  std::vector<Node> parsedNodes;
 
-            Parser(GTOML::Lexer lexer)
-                : lexer(lexer){
-                    file_path = lexer.getFilePath();
-                };
-            void Parse();
+  Parser(std::string file_path) : lexer(file_path) {
+    lexer.read();
+    lexer.lex();
+    lexer.toknizer();
+    Parse();
+  };
+  void Parse();
 
-            void printIR();
-            void printNodeIR(const std::shared_ptr<TOMLNode>& node);
+  void printIR();
+  void printNodeIR(const Node& node);
 
-            std::string getFilePath() { return file_path; }
-            std::string findValueByKey(const std::string& key);
-        private:
-            GTOML::Lexer lexer;
-            std::string file_path;
+  std::string getFilePath() { return file_path; }
+  std::string getValueByKey(const std::string& key);
+  std::shared_ptr<TOMLNode> getNodeByKey(const std::string& key);
 
-            bool expect(Token token);
-            void consume();
+  std::vector<std::string> ArrayToVector(const Node& node);
 
-            std::shared_ptr<TOMLNode> parseKey();
-            std::shared_ptr<TOMLNode> parseArray();
-    };
+ private:
+  GTOML::Lexer lexer;
+  std::string file_path;
+
+  bool expect(Token token);
+  void consume();
+
+  std::shared_ptr<TOMLNode> parseKey();
+  std::shared_ptr<TOMLNode> parseArray();
+};
 }  // namespace GTOML
