@@ -1,0 +1,7 @@
+D:/dev/toml-parser/bld/CMakeFiles/libgtoml.dir
+D:/dev/toml-parser/bld/CMakeFiles/edit_cache.dir
+D:/dev/toml-parser/bld/CMakeFiles/rebuild_cache.dir
+D:/dev/toml-parser/bld/CMakeFiles/list_install_components.dir
+D:/dev/toml-parser/bld/CMakeFiles/install.dir
+D:/dev/toml-parser/bld/CMakeFiles/install/local.dir
+D:/dev/toml-parser/bld/CMakeFiles/install/strip.dir

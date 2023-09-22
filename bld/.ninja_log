@@ -1,0 +1,9 @@
+# ninja log v5
+18	765	7170505617384565	CMakeFiles/gtoml.dir/src/lexer.cpp.obj	2aa7c2d21e07072a
+14	1258	7170505622309397	CMakeFiles/gtoml.dir/src/parser.cpp.obj	bb2ab067d9624dec
+1259	1575	7170505625447087	libgtoml.dll	efbc3bea5cfafb7b
+1259	1575	7170505625447087	libgtoml.dll.a	efbc3bea5cfafb7b
+22	738	7170506568900885	CMakeFiles/libgtoml.dir/src/lexer.cpp.obj	2ddd957600d2226f
+26	844	7170506569968079	CMakeFiles/libgtoml.dir/src/main.cpp.obj	b29506d63fba36d7
+30	1306	7170506574585947	CMakeFiles/libgtoml.dir/src/parser.cpp.obj	cb09c1faf5bfbf8d
+1306	1604	7170506577584799	liblibgtoml.a	8f97ee1ca620329d
