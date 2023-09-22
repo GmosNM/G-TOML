@@ -335,6 +335,9 @@ void Lexer::read() {
     file.close();
 
     content.push_back('\0');
+  }else{
+    std::cout << "File not found" << std::endl;
+    exit(1);
   }
 }
 
