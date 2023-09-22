@@ -37,6 +37,22 @@ Follow these instructions to get started with G-TOML in your C++ project.
 
 3. Link the G-TOML library to your C++ project.
 
+### Simple CMake for you project
+
+ ```cmake
+cmake_minimum_required(VERSION 3.12)
+project(G-TOML-TEST)
+
+set(CMAKE_CXX_STANDARD 17)
+
+# path to g-toml directory
+add_subdirectory(G-TOML)
+
+add_executable(G-TOML-TEST main.cpp)
+
+target_link_libraries(G-TOML-TEST libgtoml)
+```
+
 ### Usage
 
 Here's a basic example of how to use G-TOML to parse a TOML file:
