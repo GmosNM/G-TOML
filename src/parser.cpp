@@ -112,7 +112,7 @@ std::shared_ptr<TOMLNode> Parser::parseTable() {
     tableNode->name = tableName;
 
     Token currentToken = lexer.GetCurrentToken().type;
-    while (currentToken == Token::IDENTIFIER || currentToken == Token::LEFT_BRACKET) {
+    while (currentToken == Token::IDENTIFIER) {
         std::shared_ptr<TOMLNode> keyValueNode;
 
         if (currentToken == Token::IDENTIFIER) {
