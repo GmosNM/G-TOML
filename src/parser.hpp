@@ -8,9 +8,9 @@ namespace GTOML {
     typedef std::shared_ptr<TOMLNode> Node;
     class Parser {
         public:
-            std::vector<Node> parsedNodes;
 
             Parser(std::string file_path) : lexer(file_path) {
+                file_path = file_path.substr(0, file_path.find_last_of('.'));
                 lexer.read();
                 lexer.lex();
                 lexer.toknizer();
@@ -19,16 +19,15 @@ namespace GTOML {
             bool Parse();
 
             void printIR();
-            void printNodeIR(const Node& node, int indentLevel);
+
 
             std::string getValueByKey(const std::string& key);
             std::string getTableValue(const std::string& key);
-            std::vector<std::string> getArrayValue(const std::string& tableAndKey);
 
-            std::vector<std::string> ArrayToVector(const Node& node);
         private:
             Lexer lexer;
             std::string file_path;
+            std::vector<Node> parsedNodes;
 
             bool expect(Token token);
             void consume();
@@ -36,8 +35,14 @@ namespace GTOML {
             Node parseKey();
             Node parseArray();
             Node parseTable();
+            Node parseTableKey();
+            Node parseTableArray();
+            Node getNode(const std::string& key);
 
 
-            Node getNodeByKey(const std::string& key);
+            void printValueNodeIR(const Node& node, int indentLevel);
+            void printNodeIR(const Node& node, int indentLevel);
+
+
     };
 }  // namespace GTOML

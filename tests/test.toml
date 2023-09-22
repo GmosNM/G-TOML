@@ -1,8 +1,13 @@
 [package]
 name = "gtoml"
 version = 0.1
-
-
-array = [1,2,3,4]
+is_experimental = true
+files = [
+    "src/main.cpp",
+    "src/libgtoml.cpp",
+    "src/libgtoml.hpp",
+    "src/libgtoml.hpp",
+    "src/libgtoml.hpp",
+]
 
 

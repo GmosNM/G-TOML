@@ -5,18 +5,18 @@
 using namespace GTOML;
 
 int main() {
-    Parser parser("tests/test.toml");
-    if (parser.Parse()) {
-        auto package_name = parser.getTableValue("package.name");
-        std::cout << "name: " << package_name << std::endl;
-        auto package_version = parser.getTableValue("package.version");
-        std::cout << "version: " << package_version << std::endl;
+    Parser toml("tests/test.toml");
+    if (toml.Parse()) {
+        toml.printIR();
+        auto package_name = toml.getTableValue("package.name");
+        std::cout << package_name << std::endl;
 
-        std::cout << "Array: " << std::endl;
-        auto array = parser.getArrayValue("array");
-        for (auto value : array) {
-            std::cout << value << std::endl;
-        }
+        auto package_version = toml.getTableValue("package.version");
+        std::cout << package_version << std::endl;
+
+        auto is_experimental = toml.getTableValue("package.is_experimental");
+        std::cout << is_experimental << std::endl;
+
 
     } else {
         std::cerr << "Failed to parse TOML file." << std::endl;
