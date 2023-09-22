@@ -23,8 +23,6 @@ enum class Token {
 struct SToken {
   Token type;
   std::string value;
-  Token next;
-  Token prev;
   std::string ToString() {
     switch (type) {
       case Token::LEFT_BRACKET:
@@ -78,11 +76,9 @@ class Lexer {
   void print_file();
   void toknizer();
   void lex();
-  void print_token_types(int indentLevel);
   void print_tokens();
-  void print_token(const SToken& token, int indentLevel,
-                   const std::string& tokenTypeStr);
   void print_tokens_type();
+
   Token classify_token(const SToken& token);
   bool is_number(const std::string& str);
   bool is_string(const std::string& str);
@@ -91,7 +87,6 @@ class Lexer {
   SToken CreateEofToken();
 
   std::string getFilePath() { return filename; }
-
   std::string ToString(Token token);
 
  private:

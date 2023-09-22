@@ -8,6 +8,8 @@ bool Parser::Parse() {
   while (currentTokenType != Token::EoF) {
     if (currentTokenType == Token::IDENTIFIER) {
       parseKey();
+    } else if (currentTokenType == Token::LEFT_BRACKET) {
+      parseTable();
     } else {
       std::cerr << "Unexpected token: " << lexer.ToString(currentTokenType)
                 << std::endl;
@@ -67,7 +69,6 @@ std::shared_ptr<TOMLNode> Parser::parseKey() {
       stream << std::fixed << std::setprecision(1) << floatValue;
       keyValueNode = std::make_shared<KeyValueNode>(
           key, std::make_shared<FloatNode>(stream.str()));
-
     } else if (currentToken == Token::BOOL) {
       bool boolValue;
       if (lexer.GetCurrentToken().value == "true") {
@@ -88,6 +89,37 @@ std::shared_ptr<TOMLNode> Parser::parseKey() {
   parsedNodes.push_back(keyValueNode);
 
   return keyValueNode;
+}
+
+std::shared_ptr<TOMLNode> Parser::parseTable() {
+  expect(Token::LEFT_BRACKET);
+  consume();
+
+  expect(Token::IDENTIFIER);
+  std::string tableName = lexer.GetCurrentToken().value;
+  consume();
+
+  expect(Token::RIGHT_BRACKET);
+  consume();
+
+  std::vector<std::shared_ptr<TOMLNode>> entries;
+  std::shared_ptr<TableNode> tableNode = std::make_shared<TableNode>(entries);
+  tableNode->name = tableName;
+
+  Token currentToken = lexer.GetCurrentToken().type;
+  while (currentToken == Token::IDENTIFIER) {
+    std::shared_ptr<TOMLNode> keyValueNode = parseKey();
+    if (keyValueNode) {
+      tableNode->entries.push_back(keyValueNode);
+    } else {
+      return nullptr;
+    }
+    currentToken = lexer.GetCurrentToken().type;
+  }
+
+  parsedNodes.push_back(tableNode);
+
+  return tableNode;
 }
 
 std::shared_ptr<TOMLNode> Parser::parseArray() {
@@ -152,33 +184,46 @@ void Parser::printIR() {
   std::cout << "IR:     "
             << "Size: " << parsedNodes.size() << std::endl;
   for (const auto& node : parsedNodes) {
-    printNodeIR(node);
+    if (auto tableNode = std::dynamic_pointer_cast<TableNode>(node)) {
+      std::cout << "Table: " << tableNode->name << std::endl;
+      for (const auto& entry : tableNode->entries) {
+        printNodeIR(entry, 1);
+      }
+    } else if (auto keyValueNode =
+                   std::dynamic_pointer_cast<KeyValueNode>(node)) {
+      std::cout << "Key: " << keyValueNode->key << ", Value: ";
+      printNodeIR(keyValueNode->value, 0);
+    }
   }
 }
 
-void Parser::printNodeIR(const std::shared_ptr<TOMLNode>& node) {
+void Parser::printNodeIR(const std::shared_ptr<TOMLNode>& node,
+                         int indentLevel) {
+  std::string indent(indentLevel * 2, ' ');
+
   if (auto keyValueNode = std::dynamic_pointer_cast<KeyValueNode>(node)) {
-    std::cout << "Key: " << keyValueNode->key << ", Value: ";
-    printNodeIR(keyValueNode->value);
+    std::cout << indent << "Key: " << keyValueNode->key << ", Value: ";
+    printNodeIR(keyValueNode->value, indentLevel);
   } else if (auto stringNode = std::dynamic_pointer_cast<StringNode>(node)) {
-    std::cout << "String: " << stringNode->value << std::endl;
+    std::cout << indent << "String: " << stringNode->value << std::endl;
   } else if (auto integerNode = std::dynamic_pointer_cast<IntegerNode>(node)) {
-    std::cout << "Integer: " << integerNode->value << std::endl;
+    std::cout << indent << "Integer: " << integerNode->value << std::endl;
   } else if (auto floatNode = std::dynamic_pointer_cast<FloatNode>(node)) {
-    std::cout << "Float: " << std::fixed << std::setprecision(6)
+    std::cout << indent << "Float: " << std::fixed << std::setprecision(6)
               << floatNode->value << std::endl;
   } else if (auto boolNode = std::dynamic_pointer_cast<BoolNode>(node)) {
-    std::cout << "Bool: " << (boolNode->value ? "true" : "false") << std::endl;
+    std::cout << indent << "Bool: " << (boolNode->value ? "true" : "false")
+              << std::endl;
   } else if (auto arrayNode = std::dynamic_pointer_cast<ArrayNode>(node)) {
-    std::cout << "Array: " << arrayNode->array_name << std::endl;
+    std::cout << indent << "Array: " << arrayNode->array_name << std::endl;
     for (const auto& element : arrayNode->elements) {
-      std::cout << "  ";
-      printNodeIR(element);
+      std::cout << indent << "  ";
+      printNodeIR(element, indentLevel + 1);
     }
   } else if (auto tableNode = std::dynamic_pointer_cast<TableNode>(node)) {
-    std::cout << "Table:" << std::endl;
+    std::cout << indent << "Table: " << tableNode->name << std::endl;
     for (const auto& entry : tableNode->entries) {
-      printNodeIR(entry);
+      printNodeIR(entry, indentLevel + 1);
     }
   }
 }
@@ -208,7 +253,6 @@ std::string Parser::getValueByKey(const std::string& key) {
         }
 
         arrayValue += "]";
-
         return arrayValue;
       }
     } else if (auto keyValueNode =
@@ -232,7 +276,7 @@ std::string Parser::getValueByKey(const std::string& key) {
       }
     }
   }
-  return "ERROR: Could not find \"" + key + "\" in file " + getFilePath();
+  return "ERROR: Could not find \"" + key + "\" in file " + file_path;
 }
 
 std::vector<std::string> Parser::ArrayToVector(
@@ -256,32 +300,162 @@ std::vector<std::string> Parser::ArrayToVector(
   return vec;
 }
 
-std::shared_ptr<TOMLNode> Parser::getNodeByKey(const std::string& key) {
-  for (const auto& node : parsedNodes) {
-    if (auto arrayNode = std::dynamic_pointer_cast<ArrayNode>(node)) {
-      if (arrayNode->array_name == key) {
-        return arrayNode;
-      }
-    } else if (auto keyValueNode =
-                   std::dynamic_pointer_cast<KeyValueNode>(node)) {
-      if (keyValueNode->key == key) {
-        auto valueNode = keyValueNode->value;
-
-        if (auto stringNode =
-                std::dynamic_pointer_cast<StringNode>(valueNode)) {
-          return stringNode;
-        } else if (auto intNode =
-                       std::dynamic_pointer_cast<IntegerNode>(valueNode)) {
-          return intNode;
-        } else if (auto floatNode =
-                       std::dynamic_pointer_cast<FloatNode>(valueNode)) {
-          return floatNode;
-        } else if (auto boolNode =
-                       std::dynamic_pointer_cast<BoolNode>(valueNode)) {
-          return boolNode;
+Node Parser::getNodeByKey(const std::string& key) {
+    size_t dotPos = key.find('.');
+    if (dotPos == std::string::npos) {
+        for (const auto& node : parsedNodes) {
+            if (auto tableNode = std::dynamic_pointer_cast<TableNode>(node)) {
+                if (tableNode->name == key) {
+                    return tableNode;
+                }
+            }
         }
-      }
+    } else {
+        std::string tableName = key.substr(0, dotPos);
+        std::string subKey = key.substr(dotPos + 1);
+
+        for (const auto& node : parsedNodes) {
+            if (auto tableNode = std::dynamic_pointer_cast<TableNode>(node)) {
+                if (tableNode->name == tableName) {
+                    for (const auto& entry : tableNode->entries) {
+                        if (auto keyValueNode = std::dynamic_pointer_cast<KeyValueNode>(entry)) {
+                            if (keyValueNode->key == subKey) {
+                                auto valueNode = keyValueNode->value;
+
+                                if (auto stringNode = std::dynamic_pointer_cast<StringNode>(valueNode)) {
+                                    return stringNode;
+                                } else if (auto intNode = std::dynamic_pointer_cast<IntegerNode>(valueNode)) {
+                                    return intNode;
+                                } else if (auto floatNode = std::dynamic_pointer_cast<FloatNode>(valueNode)) {
+                                    return floatNode;
+                                } else if (auto boolNode = std::dynamic_pointer_cast<BoolNode>(valueNode)) {
+                                    return boolNode;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-  }
-  return nullptr;
+    return nullptr;
 }
+
+
+std::string Parser::getTableValue(const std::string& tableAndKey) {
+    size_t dotPos = tableAndKey.find('.');
+    if (dotPos == std::string::npos) {
+        return "ERROR: Invalid table.key format";
+    }
+
+    std::string tableName = tableAndKey.substr(0, dotPos);
+    std::string key = tableAndKey.substr(dotPos + 1);
+
+    for (const auto& node : parsedNodes) {
+        if (auto tableNode = std::dynamic_pointer_cast<TableNode>(node)) {
+            if (tableNode->name == tableName) {
+                for (const auto& entry : tableNode->entries) {
+                    if (auto keyValueNode =
+                            std::dynamic_pointer_cast<KeyValueNode>(entry)) {
+                        if (keyValueNode->key == key) {
+                            if (auto stringNode =
+                                    std::dynamic_pointer_cast<StringNode>(
+                                        keyValueNode->value)) {
+                                return stringNode->value;
+                            } else if (auto intNode =
+                                           std::dynamic_pointer_cast<IntegerNode>(
+                                               keyValueNode->value)) {
+                                return std::to_string(intNode->value);
+                            } else if (auto floatNode =
+                                           std::dynamic_pointer_cast<FloatNode>(
+                                               keyValueNode->value)) {
+                                return floatNode->value;
+                            } else if (auto boolNode =
+                                           std::dynamic_pointer_cast<BoolNode>(
+                                               keyValueNode->value)) {
+                                return boolNode->value ? "true" : "false";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return "ERROR: Could not find value for key \"" + key + "\" in table \"" +
+           tableName + "\" in file " + file_path;
+}
+
+
+std::vector<std::string> Parser::getArrayValue(const std::string& tableAndKey) {
+    size_t dotPos = tableAndKey.find('.');
+    if (dotPos == std::string::npos) {
+        for (const auto& node : parsedNodes) {
+            if (auto arrayNode = std::dynamic_pointer_cast<ArrayNode>(node)) {
+                if (arrayNode->array_name == tableAndKey) {
+                    std::vector<std::string> arrayValues;
+                    for (const auto& element : arrayNode->elements) {
+                        if (auto stringElement =
+                                std::dynamic_pointer_cast<StringNode>(element)) {
+                            arrayValues.push_back(stringElement->value);
+                        } else if (auto intElement =
+                                       std::dynamic_pointer_cast<IntegerNode>(element)) {
+                            arrayValues.push_back(std::to_string(intElement->value));
+                        } else if (auto floatElement =
+                                       std::dynamic_pointer_cast<FloatNode>(element)) {
+                            arrayValues.push_back(floatElement->value);
+                        } else if (auto boolElement =
+                                       std::dynamic_pointer_cast<BoolNode>(element)) {
+                            arrayValues.push_back(boolElement->value ? "true" : "false");
+                        }
+                    }
+                    return arrayValues;
+                }
+            }
+        }
+        return {};
+    }
+
+    std::string tableName = tableAndKey.substr(0, dotPos);
+    std::string key = tableAndKey.substr(dotPos + 1);
+
+    for (const auto& node : parsedNodes) {
+        if (auto tableNode = std::dynamic_pointer_cast<TableNode>(node)) {
+            if (tableNode->name == tableName) {
+                for (const auto& entry : tableNode->entries) {
+                    if (auto keyValueNode =
+                            std::dynamic_pointer_cast<KeyValueNode>(entry)) {
+                        if (keyValueNode->key == key) {
+                            if (auto arrayNode =
+                                    std::dynamic_pointer_cast<ArrayNode>(
+                                        keyValueNode->value)) {
+                                std::vector<std::string> arrayValues;
+                                for (const auto& element : arrayNode->elements) {
+                                    if (auto stringElement =
+                                            std::dynamic_pointer_cast<StringNode>(
+                                                element)) {
+                                        arrayValues.push_back(stringElement->value);
+                                    } else if (auto intElement =
+                                                       std::dynamic_pointer_cast<IntegerNode>(
+                                                           element)) {
+                                        arrayValues.push_back(std::to_string(intElement->value));
+                                    } else if (auto floatElement =
+                                                       std::dynamic_pointer_cast<FloatNode>(
+                                                           element)) {
+                                        arrayValues.push_back(floatElement->value);
+                                    } else if (auto boolElement =
+                                                       std::dynamic_pointer_cast<BoolNode>(
+                                                           element)) {
+                                        arrayValues.push_back(boolElement->value ? "true" : "false");
+                                    }
+                                }
+                                return arrayValues;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return {};
+}
+

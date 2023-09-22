@@ -19,21 +19,25 @@ namespace GTOML {
             bool Parse();
 
             void printIR();
-            void printNodeIR(const Node& node);
+            void printNodeIR(const Node& node, int indentLevel);
 
-            std::string getFilePath() { return file_path; }
             std::string getValueByKey(const std::string& key);
-            std::shared_ptr<TOMLNode> getNodeByKey(const std::string& key);
+            std::string getTableValue(const std::string& key);
+            std::vector<std::string> getArrayValue(const std::string& tableAndKey);
 
             std::vector<std::string> ArrayToVector(const Node& node);
         private:
-            GTOML::Lexer lexer;
+            Lexer lexer;
             std::string file_path;
 
             bool expect(Token token);
             void consume();
 
-            std::shared_ptr<TOMLNode> parseKey();
-            std::shared_ptr<TOMLNode> parseArray();
+            Node parseKey();
+            Node parseArray();
+            Node parseTable();
+
+
+            Node getNodeByKey(const std::string& key);
     };
 }  // namespace GTOML

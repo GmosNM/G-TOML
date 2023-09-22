@@ -11,8 +11,8 @@ void Lexer::lex() {
   auto pushToken = [&]() {
     if (!currentTokenValue.empty()) {
       Token tokenType = classify_token(
-          {Token::IDENTIFIER, currentTokenValue, Token::EoF, Token::EoF});
-      tokens.push_back({tokenType, currentTokenValue, Token::EoF, Token::EoF});
+          {Token::IDENTIFIER, currentTokenValue});
+      tokens.push_back({tokenType, currentTokenValue});
       currentTokenValue.clear();
     }
   };
@@ -26,27 +26,27 @@ void Lexer::lex() {
           if (insideBrackets) {
             pushToken();
           }
-          tokens.push_back({Token::LEFT_BRACKET, "[", Token::EoF, Token::EoF});
+          tokens.push_back({Token::LEFT_BRACKET, "["});
           insideBrackets = true;
         }
         break;
       case ']':
         if (!insideComment) {
           pushToken();
-          tokens.push_back({Token::RIGHT_BRACKET, "]", Token::EoF, Token::EoF});
+          tokens.push_back({Token::RIGHT_BRACKET, "]"});
           insideBrackets = false;
         }
         break;
       case '=':
         if (!insideComment) {
           pushToken();
-          tokens.push_back({Token::EQUAL, "=", Token::EoF, Token::EoF});
+          tokens.push_back({Token::EQUAL, "="});
         }
         break;
       case ',':
         if (!insideComment) {
           pushToken();
-          tokens.push_back({Token::COMMA, ",", Token::EoF, Token::EoF});
+          tokens.push_back({Token::COMMA, ","});
         }
       case '\n':
       case '\t':
@@ -70,7 +70,7 @@ void Lexer::lex() {
         break;
       case '\0':
         pushToken();
-        tokens.push_back({Token::EoF, "\0", Token::EoF, Token::EoF});
+        tokens.push_back({Token::EoF, "\0"});
         break;
       default:
         if (!insideComment) {
@@ -134,7 +134,7 @@ bool Lexer::is_number(const std::string& str) {
     start = 1;
   }
 
-  size_t numUnderscores = 0;  // Count the underscores
+  size_t numUnderscores = 0;
 
   for (size_t i = start; i < str.length(); ++i) {
     if (str[i] == '_') {
@@ -250,79 +250,6 @@ void Lexer::print_tokens_type() {
   }
 }
 
-void Lexer::print_token_types(int indentLevel = 0) {
-  int currentIndex = 0;
-
-  while (currentIndex < tokens.size()) {
-    const SToken& token = tokens[currentIndex];
-    std::string tokenTypeStr;
-
-    switch (token.type) {
-      case Token::LEFT_BRACKET:
-        tokenTypeStr = "LEFT_BRACKET";
-        std::cout << "["
-                  << " : Type: " << tokenTypeStr << std::endl;
-        ++indentLevel;
-        break;
-      case Token::RIGHT_BRACKET:
-        --indentLevel;
-        tokenTypeStr = "RIGHT_BRACKET";
-        std::cout << "]"
-                  << " : Type: " << tokenTypeStr << std::endl;
-        break;
-      case Token::EQUAL:
-        tokenTypeStr = "EQUAL";
-        std::cout << "= : Type: " << tokenTypeStr << std::endl;
-        break;
-      case Token::NUMBER:
-        tokenTypeStr = "NUMBER";
-        print_token(token, indentLevel, tokenTypeStr);
-        break;
-      case Token::STRING:
-        tokenTypeStr = "STRING";
-        print_token(token, indentLevel, tokenTypeStr);
-        break;
-      case Token::BOOL:
-        tokenTypeStr = "BOOL";
-        print_token(token, indentLevel, tokenTypeStr);
-        break;
-      case Token::FLOAT:
-        tokenTypeStr = "FLOAT";
-        print_token(token, indentLevel, tokenTypeStr);
-        break;
-      case Token::DOT:
-        tokenTypeStr = "DOT";
-        print_token(token, indentLevel, tokenTypeStr);
-        break;
-      case Token::COMMA:
-        tokenTypeStr = "COMMA";
-        print_token(token, indentLevel, tokenTypeStr);
-        break;
-      case Token::EoF:
-        tokenTypeStr = "EoF";
-        print_token(token, indentLevel, tokenTypeStr);
-        break;
-      default:
-        tokenTypeStr = "IDENTIFIER";
-        print_token(token, indentLevel, tokenTypeStr);
-        break;
-    }
-
-    currentIndex++;
-  }
-}
-
-void Lexer::print_token(const SToken& token, int indentLevel,
-                        const std::string& tokenTypeStr) {
-  std::cout << std::string(indentLevel, ' ') << token.value
-            << " : Type: " << tokenTypeStr << std::endl;
-}
-
-void Lexer::print_tokens() {
-  for (auto token : tokens) {
-    std::cout << token.value << std::endl;
-  }
-}
 
 void Lexer::read() {
   std::fstream file(filename.data(), std::ios::in | std::ios::binary);
@@ -335,8 +262,8 @@ void Lexer::read() {
     file.close();
 
     content.push_back('\0');
-  }else{
-    std::cout << "File not found" << std::endl;
+  } else {
+    std::cout << "File " << filename << " not found" << std::endl;
     exit(1);
   }
 }
